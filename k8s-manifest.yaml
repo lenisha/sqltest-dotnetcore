@@ -1,0 +1,68 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: cloudquery-service
+#  UnCOMMENT if internal
+#  annotations: 
+#      service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+spec:
+  type: LoadBalancer
+  selector:
+    app: cloudquery-web
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudquery-web
+  labels:
+    app: cloudquery-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloudquery-web
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1   # how many pods we can add at a time
+      maxUnavailable: 1 # maxUnavailable define how many pods can be unavailable during the rolling update
+  template:
+    metadata:
+      labels:
+        app: cloudquery-web
+    spec:
+      containers:
+      - name: cloudquery
+        image: XXX.azurecr.io/cloudquery:latest ## TODO: REPLACE ME
+        imagePullPolicy: Always
+        securityContext:
+          allowPrivilegeEscalation: False
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: 1
+            memory: 256Mi
+          limits:
+            cpu: 1
+            memory: 1Gi 
+        readinessProbe:
+          httpGet:
+            path: /Home/Contact
+            port: 80
+          initialDelaySeconds: 3
+          failureThreshold: 3
+          periodSeconds: 5
+          timeoutSeconds: 1
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          failureThreshold: 5
+          periodSeconds: 12
+          timeoutSeconds: 1

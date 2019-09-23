@@ -1,0 +1,174 @@
+﻿@model CloudQuery.Models.QueryResult
+@using System.Data;
+@{
+    ViewData["Title"] = "CloudQuery Query Editor";
+}
+<script>
+    function removeConnection() {
+        if (window.confirm('Are you sure you want to remove this connection?')) {
+            var conns = [];
+            var connToRemove = $('#connections').val();
+            connToRemove = JSON.parse(connToRemove).ConnectionName;
+
+            if (window.localStorage.getItem("connections") != null)
+                conns = JSON.parse(window.localStorage.getItem("connections"))
+
+            for (i = 0; i < conns.length; i++) {
+                if (conns[i].ConnectionName == connToRemove) {
+                    conns.splice(i, 1);
+                }
+            }
+
+            // stick in browser localStorage
+            window.localStorage.setItem("connections", JSON.stringify(conns));
+
+            // refresh the connections
+            populateConnections();
+        }
+
+    }
+
+    function addConnection() {
+        var conns = [];
+
+        if (window.localStorage.getItem("connections") != null)
+            conns = JSON.parse(window.localStorage.getItem("connections"))
+
+        var connName = $("#username").val() + '@@' + $("#dbName").val() + '.' + $("#dbServer").val();
+
+        for (i = 0; i < conns.length; i++) {
+            if (conns[i].ConnectionName == connName) {
+                conns.splice(i, 1);
+            }
+        }
+
+        var conn = {
+            ConnectionName: connName,
+            DBServer: $("#dbServer").val(),
+            DBName: $("#dbName").val(),
+            Username: $("#username").val(),
+            Password: $("#password").val()
+        };
+
+        // add the connection
+        conns.push(conn);
+
+        // stick in browser localStorage
+        window.localStorage.setItem("connections", JSON.stringify(conns));
+
+        // clear the fields that were entered
+        clearAndHideConnectionFields();
+
+        // refresh the connections
+        populateConnections();
+    }
+
+    function populateConnections() {
+        // clear all connections first
+        $('#connections').empty();
+
+        var conns = JSON.parse(window.localStorage.getItem("connections"));
+
+        if (conns != null) {
+            // loop the connections and add the option item to the connection Select list
+            for (i = 0; i < conns.length; i++) {
+                // add to the list of connections
+                $('#connections').append($('<option>', {
+                    value: JSON.stringify(conns[i]),
+                    text: conns[i].ConnectionName
+                }));
+            }
+        }
+
+        if (conns.length == 0) $('#deleteConnection').hide();
+        else $('#deleteConnection').show();
+
+    }
+
+    function clearAndHideConnectionFields() {
+        $("#dbServer").val("");
+        $("#dbName").val("");
+        $("#username").val("");
+        $("#password").val("");
+
+        $("#divAddConnection").hide();
+    }
+
+    $(document).ready(function () {
+        populateConnections();
+    });
+
+</script>
+<h2>Cloud Query Editor</h2>
+<form action="/Editor/OnPostExecuteQuery" method="post" id="editorForm">
+    <div class="row">
+        <div class="col-sm-6">
+            <select id="connections" name="connections"></select> <a href="javascript:void(0);" onclick="$('#divAddConnection').show();">New</a>&nbsp;<a id="deleteConnection" href="javascript:void(0);" onclick="removeConnection();">| Delete</a>
+        </div>
+    </div>
+    <div>
+        <div id="divAddConnection" style="display: none">
+            <div class="row" style="padding: 2px;">
+                <div class="col-sm-2">DB Server:</div><div class="col-sm-10"><input name="dbServer" id="dbServer" width="250px" value=""/></div>
+            </div>
+            <div class="row" style="padding: 2px;">
+                <div class="col-sm-2">DB Name:</div><div class="col-sm-10"><input name="dbName" id="dbName" width="250" value="" /></div>
+            </div>
+            <div class="row" style="padding: 2px;">
+                <div class="col-sm-2">SQL Login:</div><div class="col-sm-10"><input name="username" id="username" width="250" /></div>
+            </div>
+            <div class="row" style="padding: 2px;">
+                <div class="col-sm-2">SQL Password:</div><div class="col-sm-10"><input id="password" name="password" width="250" type="password" /></div>
+            </div>
+            <div class="row">
+                <div class="row" style="padding: 2px;">
+                    <div class="col-sm-12" style="padding-left: 100px;"><input type="button" value="Add Connection" onclick="addConnection();" /></div>
+                </div>
+            </div>
+    </div>
+    <div class="row" style="padding: 2px;">
+        <div class="col-sm-12">
+            <textarea id="query" style="width: 600px; height: 250px" name="query"></textarea>
+        </div>
+    </div>
+    <div class="row" style="padding: 2px;">
+        <div class="col-sm-12">
+            <input type="submit" value="Execute Query" style="font-family: Arial" />
+        </div>
+    </div>
+    <div id="results">
+        <br />
+        <div id="message">
+            @if (ViewData["results"] != null) {
+            <div>@(((QueryResult)ViewData["results"]).Message)</div>
+            }
+        </div>
+        <table cellpadding="3" cellspacing="3">
+            <thead>
+                <tr>
+                    @if (ViewData["results"] != null && ((QueryResult)ViewData["results"]).Results != null)
+                    {
+                        foreach (DataColumn col in ((QueryResult)ViewData["results"]).Results.Columns)
+                        {
+                            <th style="padding: 3px;">@col.ColumnName</th>
+                        }
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @if (ViewData["results"] != null && ((QueryResult)ViewData["results"]).Results != null)
+                {
+                    foreach (DataRow row in ((QueryResult)ViewData["results"]).Results.Rows)
+                    {
+                    <tr>
+                        @foreach (DataColumn col in ((QueryResult)ViewData["results"]).Results.Columns)
+                        {
+                            <td style="padding: 3px;">@row[col.ColumnName]</td>
+                        }
+                    </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</form>
