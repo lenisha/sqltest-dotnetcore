@@ -23,10 +23,10 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends locales apt-transport-https \
     && echo "en_US.UTF-8 UTF-8" > /etc/locale.gen && locale-gen \
     && apt-get update && ACCEPT_EULA=Y apt-get -y --no-install-recommends install unixodbc  msodbcsql17 \
-    && ACCEPT_EULA=Y apt-get install -y  --no-install-recommends odbcinst mssql-tools \
     && rm -rf /var/lib/apt/lists/* 
 
-COPY odbcinst.ini /etc
+# Trace enabled 
+#COPY odbcinst.ini /etc
 
 # Install app
 WORKDIR /app
