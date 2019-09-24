@@ -57,7 +57,7 @@ namespace CloudQuery.Controllers
             catch (Exception ex)
             {
                 qr.Exception = ex;
-                qr.Message = ex.Message;                
+                qr.Message = ex.Message;               
             }
 
             ViewData["results"] = qr;
