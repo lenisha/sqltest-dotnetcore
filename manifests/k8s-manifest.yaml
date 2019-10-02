@@ -67,3 +67,11 @@ spec:
           failureThreshold: 5
           periodSeconds: 12
           timeoutSeconds: 1
+        volumeMounts:
+        - name: sqlservice
+          mountPath: "/etc/sqlservice"
+          readOnly: true
+      volumes:
+      - name: sqlservice
+        secret:
+          secretName: sqlserver-query

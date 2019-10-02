@@ -1,0 +1,8 @@
+apiVersion: azure.microsoft.com/v1
+kind: SqlServer
+metadata:
+  name: sqlserver-query
+spec:
+  location: "eastus2"
+  resourcegroup: "search"
+  allowazureserviceaccess: true
