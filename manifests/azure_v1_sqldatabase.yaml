@@ -5,5 +5,8 @@ metadata:
 spec:
   location: eastus2
   resourcegroup: search
+  # Basic=0; Business=1; BusinessCritical=2; DataWarehouse=3; Free=4;
+  # GeneralPurpose=5; Hyperscale=6; Premium=7; PremiumRS=8; Standard=9;
+  # Stretch=10; System=11; System2=12; Web=13
   edition: 5
   server:  sqlserver-query
