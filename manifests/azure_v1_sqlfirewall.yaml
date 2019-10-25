@@ -1,0 +1,10 @@
+apiVersion: azure.microsoft.com/v1alpha1
+kind: AzureSqlFirewallRule
+metadata:
+  name: sqlserver-query-fw
+spec:
+  resourcegroup: search
+  server:  sqlserver-query
+  # this IP range enables Azure Service access
+  startipaddress: 23.101.192.160
+  endipaddress: 23.101.192.160

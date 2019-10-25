@@ -79,7 +79,7 @@ namespace CloudQuery.Controllers
             conn.Username = data;
             data = System.IO.File.ReadAllText(AzureSecretsMountPath +"/password");
             conn.Password = data;
-            data = System.IO.File.ReadAllText(AzureSecretsMountPath +"/sqlservername");
+            data = System.IO.File.ReadAllText(AzureSecretsMountPath +"/azuresqlservername");
             conn.DBServer = data;
             conn.DBName = conn.DBName.Substring(1);
         }
