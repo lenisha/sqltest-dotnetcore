@@ -1,0 +1,14 @@
+apiVersion: azure.microsoft.com/v1alpha1
+kind: AzureSqlFailoverGroup
+metadata:
+  name: azuresqlfog-sample
+spec:
+  location: eastus2
+  resourcegroup: search
+  server: sqlserver-query
+  failoverpolicy: automatic
+  failovergraceperiod: 30
+  secondaryserver: sqlserver-query-secondary
+  secondaryserverresourcegroup: search
+  databaselist:
+     - "sqldatabase-sample465"

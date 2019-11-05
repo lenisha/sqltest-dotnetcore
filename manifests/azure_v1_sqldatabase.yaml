@@ -1,7 +1,7 @@
 apiVersion: azure.microsoft.com/v1alpha1
 kind: AzureSqlDatabase
 metadata:
-  name:  sqldatabase-sample123
+  name: sqldatabase-sample465
 spec:
   location: eastus2
   resourcegroup: search

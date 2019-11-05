@@ -1,0 +1,7 @@
+apiVersion: azure.microsoft.com/v1alpha1
+kind: AzureSqlServer
+metadata:
+  name: sqlserver-query-secondary
+spec:
+  location: westus2
+  resourcegroup: search
