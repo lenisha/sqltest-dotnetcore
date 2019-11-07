@@ -1,0 +1,12 @@
+apiVersion: azure.microsoft.com/v1alpha1
+kind: AzureSQLUser
+metadata:
+  name: sqldb-readonlyuser
+spec:
+  server: sqlserver-query
+  dbname: sqldatabase-sample465
+  adminsecret: sqlserver-query-adminsecret
+  # possible roles:
+  # db_owner, db_securityadmin, db_accessadmin, db_backupoperator, db_ddladmin, db_datawriter, db_datareader, db_denydatawriter, db_denydatareader
+  roles:
+    - "db_datareader"

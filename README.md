@@ -18,8 +18,9 @@ az login
 az acr build --registry <REGISTRY_NAME> --image cloudquery:latest . 
 ```
 
-## Kube
+## Kube Deployment
 
+### Managing Server and DB
 Deploy SQL Server and DB (update firewall as needed)
 ```
 kubectl apply -f manifests/azure_v1_sqlserver.yaml
@@ -34,23 +35,115 @@ kubectl get secret sqlserver-query
 kubectl describe azuresqlserver sqlserver-query
 ```
 
-Secret will have fully qualified servername, username and password
+Secret will have SQL Server Admin user,fully qualified servername, username and password
 
 ```
 $ kubectl get secret sqlserver-query -o yaml
 apiVersion: v1
 data:
-  azuresqlservername: c3Fsc2VydmVyLXF1ZXJ5
-  fullyqualifiedservername: c3Fsc2VydmVyLXF1ZXJ5LmRhdGFiYXNlLndpbmRvd3MubmV0
-  fullyqualifiedusername: MTczdjhpaG1Ac3Fsc2VydmVyLXF1ZXJ5
-  password: NEk6TS1+Rk8vNTF8dThvNw==
-  username: MTczdjhpaG0=
+  azuresqlservername: 
+  fullyqualifiedservername: 
+  fullyqualifiedusername: 
+  password: 
+  username: 
 kind: Secret
 metadata:
   creationTimestamp: "2019-10-25T01:24:31Z"
   name: sqlserver-query
 ```
+### Managing DB and DBUsers only
 
+Create Azure SQL Server outside the operator (ARM/Terraform/Powershell), now create Database using operator pointing to the name of the server (only logical name)
+
+```
+kubectl apply -f manifests/azure_v1_sqldatabase.yaml
+```
+
+Example Database yaml
+```
+apiVersion: azure.microsoft.com/v1alpha1
+kind: AzureSqlDatabase
+metadata:
+  name: sqldatabase-sample465
+spec:
+  location: eastus2
+  resourcegroup: search
+  # Basic=0; Business=1; BusinessCritical=2; DataWarehouse=3; Free=4;
+  # GeneralPurpose=5; Hyperscale=6; Premium=7; PremiumRS=8; Standard=9;
+  # Stretch=10; System=11; System2=12; Web=13
+  edition: 5
+  server:  sqlserver-query # Name of the SERVER
+ ``` 
+
+Create secret with SQL Server Admin credentials - it will be used to provision DB User (will be in AKV in the future)
+
+```
+kubectl  \
+    create secret generic sqlserver-query-adminsecret \
+    --from-literal=azuresqlservername="sqlserver-query" \
+    --from-literal=password="" \
+    --from-literal=username="" \
+```
+
+Create DB User using operator
+
+```
+kubectl apply -f manifests/azure_v1_sqldbuser.yaml
+```
+
+Example DB User:
+
+```
+apiVersion: azure.microsoft.com/v1alpha1
+kind: AzureSQLUser
+metadata:
+  name: sqldb-readonlyuser
+spec:
+  server: sqlserver-query
+  dbname: sqldatabase-sample465
+  adminsecret: sqlserver-query-adminsecret
+  # possible roles:
+  # db_owner, db_securityadmin, db_accessadmin, db_backupoperator, db_ddladmin, db_datawriter, db_datareader, db_denydatawriter, db_denydatareader
+  roles:
+    - "db_datareader"
+```
+
+Once DB and DB user finish provisioning, you will get a K8S secret object containing data to establish SQL connection:
+
+```
+$ k get secret sqldb-readonlyuser -o yaml
+apiVersion: v1
+data:
+  password: 
+  sqlservername: 
+  sqlservernamespace: 
+  username: 
+kind: Secret
+```
+
+### Create Failover Group for GeoReplication
+
+Create Secondary Azure SQL Server, and then create FailoverGroup using K8S CRD pointing to primary and secondary servers
+
+```
+apiVersion: azure.microsoft.com/v1alpha1
+kind: AzureSqlFailoverGroup
+metadata:
+  name: azuresqlfog-sample
+spec:
+  location: eastus2
+  resourcegroup: search
+  server: sqlserver-query
+  failoverpolicy: automatic
+  failovergraceperiod: 30
+  secondaryserver: sqlserver-query-secondary
+  secondaryserverresourcegroup: search
+  databaselist:
+     - "sqldatabase-sample465"
+```
+
+
+### Deploy the Application
 
 Deploy the app
 ```
