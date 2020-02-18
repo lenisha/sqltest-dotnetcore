@@ -345,7 +345,7 @@ as a result data will be enctypted in db and you'll see CMK provisioned in the v
 
 
 # Sample T-SQL to provision CMK/CEK in code
-To encrypt columns using T-SQL refer to article: (CREATE COLUMN MASTER KEY )[https://docs.microsoft.com/en-us/sql/t-sql/statements/create-column-master-key-transact-sql?view=sql-server-ver15] and (ALTER COLUMN ENCRYPTION KEY)[https://docs.microsoft.com/en-us/sql/t-sql/statements/alter-column-encryption-key-transact-sql?view=sql-server-ver15]
+To encrypt columns using T-SQL refer to article: [CREATE COLUMN MASTER KEY](https://docs.microsoft.com/en-us/sql/t-sql/statements/create-column-master-key-transact-sql?view=sql-server-ver15) and [ALTER COLUMN ENCRYPTION KEY](https://docs.microsoft.com/en-us/sql/t-sql/statements/alter-column-encryption-key-transact-sql?view=sql-server-ver15)
 
 Process will envolve following steps:
 1. Create Master Key
@@ -360,7 +360,11 @@ WITH (
 2. Create Column Encryption Key
 
 ```sql
-CREATE COLUMN ENCRYPTION KEY MyCEK WITH VALUES (COLUMN_MASTER_KEY = MyCMK,ALGORITHM = 'RSA_OAEP',ENCRYPTED_VALUE = '<encryptedKeySerialized>')
+CREATE COLUMN ENCRYPTION KEY MyCEK 
+WITH VALUES  (
+  COLUMN_MASTER_KEY = MyCMK,
+  ALGORITHM = 'RSA_OAEP',
+  ENCRYPTED_VALUE = '<encryptedKeySerialized>')
 ```
 
 Where encrypted value calculated in code example C#:
@@ -370,9 +374,11 @@ Where encrypted value calculated in code example C#:
                  new SqlColumnEncryptionAzureKeyVaultProvider(
                      KyvosKeyVaultService.GetKeyVaultClientAuthCallback(tenantId, clientId, clientSecret));
 
-   byte[] cekRawValue = new byte[32];
+    byte[] cekRawValue = new byte[32];
     RandomNumberGenerator csprng = new RNGCryptoServiceProvider();
     csprng.GetBytes(cekRawValue);
+
+    string mekPath="https://<vaultname>.vault.azure.net:443/keys/MyCMK/";
     byte[] cekEncryptedValue = kvProvider.EncryptColumnEncryptionKey(mekPath, @"RSA_OAEP", cekRawValue);
-    var encryptedKeySerialized = "0x" + BitConverter.ToString(cekEncryptedValue).Replace("-", "");
+    var encryptedKeySerialized = "0x" + BitConverter.ToString(cekEncryptedValue.Replace("-", "");
 ```
