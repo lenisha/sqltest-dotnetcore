@@ -382,3 +382,4 @@ Where encrypted value calculated in code example C#:
     byte[] cekEncryptedValue = kvProvider.EncryptColumnEncryptionKey(mekPath, @"RSA_OAEP", cekRawValue);
     var encryptedKeySerialized = "0x" + BitConverter.ToString(cekEncryptedValue.Replace("-", "");
 ```
+[Using column master key store providers for programmatic key provisioning](https://docs.microsoft.com/en-us/sql/relational-databases/security/encryption/develop-using-always-encrypted-with-net-framework-data-provider?view=sql-server-ver15#using-column-master-key-store-providers-for-programmatic-key-provisioning)
