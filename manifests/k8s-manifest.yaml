@@ -34,11 +34,17 @@ spec:
     metadata:
       labels:
         app: cloudquery-web
+        aadpodidbinding: odbcidentity
     spec:
       containers:
       - name: cloudquery
-        image: acrcbio.azurecr.io/cloudquery:latest ## TODO: REPLACE ME
+        image: acraccess.azurecr.io/cloudquery:msi ## TODO: REPLACE ME
         imagePullPolicy: Always
+        env:
+          - name: ODBC_ALWAYSENCRYPTED
+            value: "true"
+          - name: MSI
+            value: "true"  
         securityContext:
           runAsUser: 1000
           runAsGroup: 3000
@@ -67,11 +73,11 @@ spec:
           failureThreshold: 5
           periodSeconds: 12
           timeoutSeconds: 1
-        volumeMounts:
-        - name: sqlservice
-          mountPath: "/etc/sqlservice"
-          readOnly: true
-      volumes:
-      - name: sqlservice
-        secret:
-          secretName: sqlserver-query
+        #volumeMounts:
+        #- name: sqlservice
+        #  mountPath: "/etc/sqlservice"
+        #  readOnly: true
+      #volumes:
+      #- name: sqlservice
+      #  secret:
+      #    secretName: sqlserver-query

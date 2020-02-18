@@ -1,0 +1,16 @@
+apiVersion: "aadpodidentity.k8s.io/v1"
+kind: AzureIdentity
+metadata:
+  name: aksodbcpodidentity
+spec:
+  type: 0
+  ResourceID: /subscriptions/f869415f-5cff-46a3-b728-20659d14d62d/resourcegroups/aks-tests/providers/Microsoft.ManagedIdentity/userAssignedIdentities/odbcidentity
+  ClientID: e8e422cc-2bb7-4d06-ba43-cff38b07a026
+--- 
+apiVersion: "aadpodidentity.k8s.io/v1"
+kind: AzureIdentityBinding
+metadata:
+  name: aksodbcpodidentity-binding
+spec:
+  AzureIdentity: "aksodbcpodidentity"
+  Selector: "odbcidentity"
