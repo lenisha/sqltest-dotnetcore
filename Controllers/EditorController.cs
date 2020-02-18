@@ -32,9 +32,9 @@ namespace CloudQuery.Controllers
             if ( conn.DBName.StartsWith("#") )
                 PopulateConnectionDataFromMount(conn);          
             string connectionString = string.Format("Server=tcp:{0}.database.windows.net,1433;Database={1};Uid={2}@{0};Pwd={3};Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;KeyStoreAuthentication=KeyVaultManagedIdentity", conn.DBServer, conn.DBName, conn.Username, conn.Password);
-            if ( "true".equals(System.Environment.getEnvironmentVariable("MSI")) )
+            if ( "true".CompareTo(System.Environment.GetEnvironmentVariable("MSI")) == 0 )
                connectionString = string.Format("Server=tcp:{0}.database.windows.net,1433;Database={1};Uid={2}@{0};Authentication=ActiveDirectoryMsi;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30", conn.DBServer, conn.DBName, conn.Username, conn.Password);
-            else if ( "true".equals(System.Environment.getEnvironmentVariable("ODBC_ALWAYSENCRYPTED")))
+            else if ( "true".CompareTo(System.Environment.GetEnvironmentVariable("ODBC_ALWAYSENCRYPTED")) ==0)
                connectionString = string.Format("Server=tcp:{0}.database.windows.net,1433;Database={1};Uid={2};Authentication=ActiveDirectoryMsi;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;ColumnEncryption=Enabled;KeyStoreAuthentication=KeyVaultManagedIdentity;KeyStorePrincipalId={2}", conn.DBServer, conn.DBName, conn.Username, conn.Password);
             
             connectionString = "Driver={ODBC Driver 17 for SQL Server};" + connectionString;

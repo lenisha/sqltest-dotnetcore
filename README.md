@@ -341,7 +341,7 @@ as a result data will be enctypted in db and you'll see CMK provisioned in the v
  ```
  kubectl apply -f manifests/k8-manifest.yaml
  ```
-![docs](./cloudquery-addmsi.png)
+![docs](./cloudquery-ae.png)
 
 
 # Sample T-SQL to provision CMK/CEK in code
