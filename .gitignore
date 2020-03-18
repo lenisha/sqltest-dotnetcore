@@ -5,4 +5,4 @@ bin/
 **/create_admin_secret.sh
 *.azcli
 out/
-.vs/
+.vs

@@ -1,7 +1,9 @@
 # Demo using AAD Pod Identity in AKS POD to connect to Azure SQL
 
+
 ## Build image
-Dockerfile is utilizing Multi Stage builds and is installing [MSSQL ODBC Driver 17](https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server?view=sql-server-2017) for Debian9 in the image .
+Dockerfile is utilizing Multi Stage builds and is installing [MSSQL ODBC Driver 17](https://docs.microsoft.com/en-us/sql/connect/odbc/linux-mac/installing-the-microsoft-odbc-driver-for-sql-server?view=sql-server-2017) for Debian9 in the image.
+Starting from version  msodbcsql17_17.5.2.1 driver supports using ManagedIdentity with AlwaysEncrypted AzureKeyvault Keys Provider scenario.
 
 ```
 docker build -t cloudquery .
@@ -27,12 +29,6 @@ Deploy the app
 kubectl apply -f manifests/k8-manifest.yaml
 ```
 
-application is binding secrets to `"/etc/sqlservice"` path , to verify run cat command on the pod
-```
-$ k exec -it -n default cloudquery-web-xxxxxxx -- ls /etc/sqlservice
-azuresqlservername        fullyqualifiedusername  username
-fullyqualifiedservername  password
-```
 
 # Test the application
 
@@ -43,7 +39,7 @@ kubectl get svc cloudquery-service
 
 Click New and type database name prepended by `#`, application will read servername, user and password from mapped file paths when encountering `#` at the start of db name.
 
-![docs](./cloudquery-add.png)
+![docs](./docs/cloudquery-add.png)
 
 use simple query like `select 1` to verify connection
 
@@ -158,7 +154,7 @@ As a result code in `EditorController.cs` will add `Authentication=ActiveDirecto
  ```
  kubectl apply -f manifests/k8-manifest.yaml
  ```
-![docs](./cloudquery-addmsi.png)
+![docs](./docs/cloudquery-addmsi.png)
 
 
 # Use Managed Identity in ODBC for AlwaysEncrypted
@@ -187,7 +183,7 @@ Read more in AAD settings for ODBC Driver in [Using Azure Active Directory with 
 ```
 az keyvault set-policy --name <vaultname> --key-permissions get list sign unwrapKey verify wrapKey --resource-group   php --spn <identity clientId>
 ```
-![docs](./keyvault-policy.png)
+![docs](./docs/keyvault-policy.png)
 
 3. Apply Always Encrypted settings on the column in DB (use SSMS)
 
@@ -208,17 +204,17 @@ insert into Persons values (1, 'Smith','Jake', '222 bay', 'toronto');
 insert into Persons values (1, 'Lannister','Tyrion', '222 bay', 'toronto');
 ```
 Go thru wizard
-![docs](./ae-columns.png)
+![docs](./docs/ae-columns.png)
 
 as a result data will be enctypted in db and you'll see CMK provisioned in the vault.
-![docs](./keyvault-cmk.png)
-![docs](./sql-encdata.png)
+![docs](./docs/keyvault-cmk.png)
+![docs](./docs/sql-encdata.png)
 
 4. Deploy and test K8S app
  ```
  kubectl apply -f manifests/k8-manifest.yaml
  ```
-![docs](./cloudquery-ae.png)
+![docs](./docs/cloudquery-ae.png)
 
 
 # Sample T-SQL to provision CMK/CEK in code
@@ -386,3 +382,9 @@ spec:
 ```
 
 
+application is binding secrets to `"/etc/sqlservice"` path , to verify run cat command on the pod
+```
+$ k exec -it -n default cloudquery-web-xxxxxxx -- ls /etc/sqlservice
+azuresqlservername        fullyqualifiedusername  username
+fullyqualifiedservername  password
+```
