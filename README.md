@@ -157,6 +157,25 @@ As a result code in `EditorController.cs` will add `Authentication=ActiveDirecto
 ![docs](./docs/cloudquery-addmsi.png)
 
 
+## Test tokens
+At NMI pod
+```
+wget  --header "podname: cloudquery-web-6575cb496f-4ghsn" --header "podns: default" -S  -O log    http://127.0.0.1:2579/host/token/?resource=https%3A%2F%2Fvault.azure.net%0A
+```
+
+At app pod:
+
+```
+ curl http://169.254.169.254/metadata/identity/oauth2/token?resource=https://vault.azure.net
+```
+
+check logs at NMI pod
+```
+time="2020-03-18T04:25:17Z" level=info msg="matched identityType:0 clientid:e8e4##### REDACTED #####a026 resource:https://database.windows.net/" req.method=GET req.path=/metadata/identity/oauth2/token req.remote=10.240.0.26
+time="2020-03-18T04:25:18Z" level=info msg="Status (200) took 360939084 ns" req.method=GET req.path=/metadata/identity/oauth2/token req.remote=10.240.0.26
+time="2020-03-18T04:25:18Z" level=info msg="matched identityType:0 clientid:e8e4##### REDACTED #####a026 resource:https://vault.azure.net" req.method=GET req.path=/metadata/identity/oauth2/token req.remote=10.240.0.26
+```
+
 # Use Managed Identity in ODBC for AlwaysEncrypted
 First follow the steps in previous chapted to enable AAD Pod Identity and MSI Authentication in ODBC driver connection.
 
